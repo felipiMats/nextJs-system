@@ -84,9 +84,9 @@ export default function DocumentTable({ documents }: { documents: DocumentDTO[] 
                   <div className="relative">
                     <button
                       onClick={() => toggleDropdown(doc.id)}
-                      className="text-sm text-[#191E29] border px-2 py-1 rounded hover:bg-gray-100"
+                      className="text-base text-[#191E29] px-2 py-1 rounded"
                     >
-                      Ações
+                     ...
                     </button>
                     {dropdownVisible[doc.id] && (
                       <div className="z-10 absolute right-0 mt-2 bg-white shadow-md rounded border w-44 p-2 flex flex-col">
