@@ -8,7 +8,7 @@ export const Navbar = ({
   onToggleSidebar: () => void;
 }) => {
   return (
-    <div className="w-full h-16 bg-white text-white fixed top-0 left-0 flex items-center justify-between px-4 z-10 shadow-md">
+    <div className="w-full h-16 bg-white text-white fixed top-0 left-0 flex items-center justify-between px-4 z-30 shadow-md">
       <div className="flex items-center">
         <button
           onClick={onToggleSidebar}
