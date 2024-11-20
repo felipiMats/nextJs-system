@@ -8,13 +8,14 @@ import {
     TableHeader
   } from "@/components/ui/table";
 import { DocumentDTO } from "@/dtos/DocumentDTO";
+import { api } from "@/lib/apiClient";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/formatDate";
 import { useEffect, useState } from "react";
 import { FiFileText, FiTrash } from "react-icons/fi";
 import { TbScanEye } from "react-icons/tb";
 
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 10;
 
 export default function DocumentTable({ documents }: { documents: DocumentDTO[] }) {
   const [dropdownVisible, setDropdownVisible] = useState<Record<string, boolean>>({});
@@ -29,15 +30,10 @@ export default function DocumentTable({ documents }: { documents: DocumentDTO[] 
   const totalNetValue = formatCurrency(documents.reduce((sum, doc) => sum + doc.netValue, 0));
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
-  const getFileNameWithoutExtension = (filePath: string) => {
-    const fileName = filePath.split('/').pop();
-    return fileName ? fileName.replace(/\.[^/.]+$/, '') : '';
-  };
-
   const toggleDropdown = (id: string) => {
     setDropdownVisible((prev) => ({ ...prev, [id]: !prev[id] }));
   };
-  console.log(screenWidth)
+  
   useEffect(() => {
     const handleResize = () => {
       setScreenWidth(window.innerWidth);
@@ -71,24 +67,24 @@ export default function DocumentTable({ documents }: { documents: DocumentDTO[] 
                     <FiFileText size={24} color="#079942" />
                     <div className="flex flex-col ml-2">
                       <span className="text-xs text-[#6B7280]">{`Cód ${doc.id}`}</span>
-                      <span className="text-sm text-[#191E29]">{getFileNameWithoutExtension(doc.attachment)}</span>
+                      <span className="text-sm text-[#191E29]">{doc.name}</span>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell className="text-sm text-[#3A424E]">{doc.uploadedBy}</TableCell>
                 <TableCell className="text-sm text-[#3A424E]">{formatCurrency(doc.totalTaxes)}</TableCell>
                 <TableCell className="text-sm text-[#3A424E]">{formatCurrency(doc.netValue)}</TableCell>
-                <TableCell className="text-sm text-[#3A424E]">{formatDate(new Date(doc.creationDate))}</TableCell>
-                <TableCell className="text-sm text-[#3A424E]">{formatDate(new Date(doc.lastUpdateDate))}</TableCell>
+                <TableCell className="text-sm text-[#3A424E]">{formatDate(new Date(doc.creationDate!))}</TableCell>
+                <TableCell className="text-sm text-[#3A424E]">{formatDate(new Date(doc.lastUpdateDate!))}</TableCell>
                 <TableCell>
                   <div className="relative">
                     <button
-                      onClick={() => toggleDropdown(doc.id)}
+                      onClick={() => toggleDropdown(doc.id!)}
                       className="text-base text-[#191E29] px-2 py-1 rounded"
                     >
                      ...
                     </button>
-                    {dropdownVisible[doc.id] && (
+                    {dropdownVisible[doc.id!] && (
                       <div className="z-10 absolute right-0 mt-2 bg-white shadow-md rounded border w-44 p-2 flex flex-col">
                         <button
                           className="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 rounded"
@@ -99,7 +95,7 @@ export default function DocumentTable({ documents }: { documents: DocumentDTO[] 
                         </button>
                         <button
                           className="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 rounded"
-                          onClick={() => console.log(`Excluir documento ${doc.id}`)}
+                          onClick={() => api.deleteDocument(doc.id!)}
                         >
                           <FiTrash size={18} />
                           <span className="text-sm text-[#191E29]">Excluir documento</span>

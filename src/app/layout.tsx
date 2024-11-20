@@ -3,7 +3,9 @@ import ClientLayout from '@/components/ClientLayout';
 import { Roboto } from 'next/font/google';
 
 const roboto = Roboto({
-  weight: ['400', '500', '700']
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
 });
 
 export const metadata = {

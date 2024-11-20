@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import DocumentTable from '@/components/DocumentTable';
-import DocumentModal from '@/components/DocumentModal';
+import { useState, useEffect } from "react";
+import DocumentTable from "@/components/DocumentTable";
+import DocumentModal from "@/components/DocumentModal";
 import { CiFilter } from "react-icons/ci";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import {
@@ -12,50 +12,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DocumentDTO } from '@/dtos/DocumentDTO';
+import { DocumentDTO } from "@/dtos/DocumentDTO";
+import { api } from "@/lib/apiClient";
 
 export default function DocumentsPage() {
-  const [documents, setDocuments] = useState<DocumentDTO[]>([
-    {
-      id: "1",
-      name: "invoice_2023",
-      uploadedBy: "João Silva",
-      documentType: "Invoice",
-      totalTaxes: 250.5,
-      netValue: 1500.75,
-      attachment: "/uploads/invoice_2023.pdf",
-      creationDate: "2023-10-01T10:30:00.000Z",
-      lastUpdateDate: "2023-11-15T15:45:00.000Z",
-    },
-    {
-      id: "2",
-      name: "contract_final",
-      uploadedBy: "Maria Oliveira",
-      documentType: "Contract",
-      totalTaxes: 0,
-      netValue: 2000,
-      attachment: "/uploads/contract_final.pdf",
-      creationDate: "2023-09-20T14:00:00.000Z",
-      lastUpdateDate: "2023-11-10T18:00:00.000Z",
-    },
-    {
-      id: "3",
-      name: "tax_report_2023",
-      uploadedBy: "João Silva",
-      documentType: "Report",
-      totalTaxes: 100,
-      netValue: 500,
-      attachment: "/uploads/tax_report_2023.pdf",
-      creationDate: "2023-08-15T09:00:00.000Z",
-      lastUpdateDate: "2023-11-16T08:00:00.000Z",
-    },
-  ]);
-  const [filters, setFilters] = useState({ documentType: '', uploadedBy: '' });
+  const [documents, setDocuments] = useState<DocumentDTO[]>([]);
+  const [filters, setFilters] = useState({
+    search: "",
+    documentOrigin: "all",
+    documentType: "all",
+  });
+
+  const filteredDocuments = documents.filter((doc) => {
+    const matchesSearch = filters.search
+      ? doc.attachment!.name.toLowerCase().includes(filters.search.toLowerCase())
+      : true;
+
+    const matchesOrigin =
+      filters.documentOrigin !== "all"
+        ? doc.documentOrigin === filters.documentOrigin
+        : true;
+
+    const matchesType =
+      filters.documentType !== "all"
+        ? doc.documentType === filters.documentType
+        : true;
+
+    return matchesSearch && matchesOrigin && matchesType;
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev) => ({ ...prev, search: e.target.value }));
+  };
+
+  const handleOriginChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, documentOrigin: value }));
+  };
+
+  const handleTypeChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, documentType: value }));
+  };
 
   const fetchDocuments = async () => {
-    const res = await fetch('/api/documents');
-    const data = await res.json();
-    setDocuments(data.documents);
+    const res = await api.getDocuments();
+    setDocuments(res);
   };
 
   useEffect(() => {
@@ -67,21 +67,25 @@ export default function DocumentsPage() {
       <div className="flex flex-col md:flex-row mb-6 border-b justify-between border-[#E5E7EB]">
         <div className="mb-4 md:mb-0">
           <h1 className="text-2xl font-bold">Documentos</h1>
-          <span className="text-sm text-[#6B7280]">Crie, gerencie e visualize os documentos</span>
+          <span className="text-sm text-[#6B7280]">
+            Crie, gerencie e visualize os documentos
+          </span>
         </div>
 
         <div className="flex flex-col mb-6 md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0">
           <input
             type="text"
             placeholder="Buscar documentos"
+            value={filters.search}
+            onChange={handleInputChange}
             className="w-full md:w-auto border border-[#E5E7EB] rounded px-4 py-2 text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#CAFFD6]"
           />
 
           <button
             className="flex items-center w-full md:w-auto justify-center text-white rounded px-4 py-2 border border-[#E5E7EB] text-sm font-medium transition"
-            onClick={() => console.log('Abrir filtros (futuro)')}
+            onClick={() => console.log("Abrir filtros (futuro)")}
           >
-            <CiFilter color='#191E29' size={18} style={{ strokeWidth: 0.5 }} />
+            <CiFilter color="#191E29" size={18} style={{ strokeWidth: 0.5 }} />
             <span className="text-sm ml-2 text-[#191E29]">Filtrar</span>
           </button>
         </div>
@@ -92,14 +96,16 @@ export default function DocumentsPage() {
           <div className="flex flex-col">
             <div className="flex gap-1">
               <span className="text-sm font-bold">Origem do documento</span>
-              <AiOutlineQuestionCircle size={16} color='#9CA3AF' />
+              <AiOutlineQuestionCircle size={16} color="#9CA3AF" />
             </div>
-            <Select>
+            <Select onValueChange={handleOriginChange}>
               <SelectTrigger className="w-full md:w-[220px]">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="light">Digitalizado</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="digitalizado">Digitalizado</SelectItem>
+                <SelectItem value="manual">Manual</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -107,14 +113,17 @@ export default function DocumentsPage() {
           <div className="flex flex-col">
             <div className="flex gap-1">
               <span className="text-sm font-bold">Tipo documental</span>
-              <AiOutlineQuestionCircle size={16} color='#9CA3AF' />
+              <AiOutlineQuestionCircle size={16} color="#9CA3AF" />
             </div>
-            <Select>
+            <Select onValueChange={handleTypeChange}>
               <SelectTrigger className="w-full md:w-[220px]">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="light">Nota fiscal de serviço</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="invoice">Nota fiscal</SelectItem>
+                <SelectItem value="contract">Contrato</SelectItem>
+                <SelectItem value="report">Relatório</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -125,7 +134,7 @@ export default function DocumentsPage() {
         </div>
       </div>
 
-      <DocumentTable documents={documents} />
+      <DocumentTable documents={filteredDocuments} />
     </div>
   );
 }
