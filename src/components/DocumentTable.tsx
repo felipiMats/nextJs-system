@@ -17,7 +17,13 @@ import { TbScanEye } from "react-icons/tb";
 
 const ITEMS_PER_PAGE = 10;
 
-export default function DocumentTable({ documents }: { documents: DocumentDTO[] }) {
+export default function DocumentTable({
+  refreshDocuments,
+  documents,
+}: {
+  refreshDocuments: () => void;
+  documents: DocumentDTO[];
+}) {
   const [dropdownVisible, setDropdownVisible] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -43,6 +49,15 @@ export default function DocumentTable({ documents }: { documents: DocumentDTO[] 
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const handleRemoveDocument = async (doc: DocumentDTO) => {
+    try {
+      await api.deleteDocument(doc.id!)
+      refreshDocuments();
+    } catch (error) {
+      console.log("ERROR REMOVE DOCUMENTS"), error
+    }
+  }
 
   return (
     <div>
@@ -95,7 +110,7 @@ export default function DocumentTable({ documents }: { documents: DocumentDTO[] 
                         </button>
                         <button
                           className="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 rounded"
-                          onClick={() => api.deleteDocument(doc.id!)}
+                          onClick={() => handleRemoveDocument(doc)}
                         >
                           <FiTrash size={18} />
                           <span className="text-sm text-[#191E29]">Excluir documento</span>
