@@ -1,1 +1,0 @@
-export { contract as documentContract } from './documents/contract';

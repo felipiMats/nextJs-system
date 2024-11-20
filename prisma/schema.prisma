@@ -9,12 +9,13 @@ datasource db {
 
 model Document {
   id              String   @id @default(uuid())
-  name            String
   uploadedBy      String
   documentType    String
+  documentOrigin  String
   totalTaxes      Float
   netValue        Float
   attachment      String
   creationDate    DateTime @default(now())
   lastUpdateDate  DateTime @updatedAt
+  name            String
 }
