@@ -134,7 +134,7 @@ export default function DocumentsPage() {
         </div>
       </div>
 
-      <DocumentTable documents={filteredDocuments} />
+      <DocumentTable documents={filteredDocuments} refreshDocuments={fetchDocuments} />
     </div>
   );
 }

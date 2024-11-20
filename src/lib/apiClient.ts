@@ -31,14 +31,12 @@ export const api = {
         : data.attachment,
     };
 
-    console.log(payload, "teste")
-
     const response = await apiClient.post('/', payload);
     return response.data;
   },
 
   deleteDocument: async (id: string) => {
-    const response = await apiClient.delete(`/${id}`);
+    const response = await apiClient.delete(`?id=${id}`);
     return response.status === 204;
   },
 };
