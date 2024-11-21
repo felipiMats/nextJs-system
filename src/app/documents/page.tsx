@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import DocumentTable from "@/components/DocumentTable";
 import DocumentModal from "@/components/DocumentModal";
+import FilterModal from "@/components/DocumentFilter";
 import { CiFilter } from "react-icons/ci";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import {
@@ -21,25 +22,56 @@ export default function DocumentsPage() {
     search: "",
     documentOrigin: "all",
     documentType: "all",
+    uploadedBy: "",
+    minTax: "",
+    maxNetValue: "",
+    creationStartDate: "",
+    creationEndDate: "",
   });
+
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = filters.search
-      ? doc.attachment!.name.toLowerCase().includes(filters.search.toLowerCase())
+      ? doc.attachment?.name.toLowerCase().includes(filters.search.toLowerCase())
       : true;
-
-    const matchesOrigin =
-      filters.documentOrigin !== "all"
-        ? doc.documentOrigin === filters.documentOrigin
-        : true;
-
-    const matchesType =
-      filters.documentType !== "all"
-        ? doc.documentType === filters.documentType
-        : true;
-
-    return matchesSearch && matchesOrigin && matchesType;
+  
+    const matchesOrigin = filters.documentOrigin !== "all"
+      ? doc.documentOrigin === filters.documentOrigin
+      : true;
+  
+    const matchesType = filters.documentType !== "all"
+      ? doc.documentType === filters.documentType
+      : true;
+  
+    const matchesUploadedBy = filters.uploadedBy
+      ? doc.uploadedBy?.toLowerCase().includes(filters.uploadedBy.toLowerCase())
+      : true;
+  
+    const matchesMinTax = filters.minTax
+      ? Number(doc.totalTaxes || 0) >= Number(filters.minTax)
+      : true;
+  
+    const matchesMaxNetValue = filters.maxNetValue
+      ? Number(doc.netValue || 0) <= Number(filters.maxNetValue)
+      : true;
+  
+    const matchesCreationDate = filters.creationStartDate || filters.creationEndDate
+      ? new Date(doc.creationDate) >= new Date(filters.creationStartDate) &&
+        new Date(doc.creationDate) <= new Date(filters.creationEndDate)
+      : true;
+  
+    return (
+      matchesSearch &&
+      matchesOrigin &&
+      matchesType &&
+      matchesUploadedBy &&
+      matchesMinTax &&
+      matchesMaxNetValue &&
+      matchesCreationDate
+    );
   });
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({ ...prev, search: e.target.value }));
@@ -83,7 +115,7 @@ export default function DocumentsPage() {
 
           <button
             className="flex items-center w-full md:w-auto justify-center text-white rounded px-4 py-2 border border-[#E5E7EB] text-sm font-medium transition"
-            onClick={() => console.log("Abrir filtros (futuro)")}
+            onClick={() => setIsFilterModalOpen(true)}
           >
             <CiFilter color="#191E29" size={18} style={{ strokeWidth: 0.5 }} />
             <span className="text-sm ml-2 text-[#191E29]">Filtrar</span>
@@ -135,6 +167,14 @@ export default function DocumentsPage() {
       </div>
 
       <DocumentTable documents={filteredDocuments} refreshDocuments={fetchDocuments} />
+
+      {isFilterModalOpen && (
+        <FilterModal
+          filters={filters}
+          setFilters={setFilters}
+          onClose={() => setIsFilterModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
