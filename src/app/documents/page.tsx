@@ -56,10 +56,12 @@ export default function DocumentsPage() {
       ? Number(doc.netValue || 0) <= Number(filters.maxNetValue)
       : true;
   
-    const matchesCreationDate = filters.creationStartDate || filters.creationEndDate
-      ? new Date(doc.creationDate) >= new Date(filters.creationStartDate) &&
-        new Date(doc.creationDate) <= new Date(filters.creationEndDate)
-      : true;
+    const matchesCreationDate =
+      (filters.creationStartDate || filters.creationEndDate) &&
+      doc.creationDate
+        ? (!filters.creationStartDate || new Date(doc.creationDate) >= new Date(filters.creationStartDate)) &&
+          (!filters.creationEndDate || new Date(doc.creationDate) <= new Date(filters.creationEndDate))
+        : true;
   
     return (
       matchesSearch &&

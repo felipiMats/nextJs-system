@@ -36,20 +36,24 @@ export default function DocumentTable({
   const totalIssuer = `${new Set(documents.map((doc) => doc.uploadedBy)).size} emitentes`;
   const totalTaxValue = formatCurrency(documents.reduce((sum, doc) => sum + doc.totalTaxes, 0));
   const totalNetValue = formatCurrency(documents.reduce((sum, doc) => sum + doc.netValue, 0));
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const [screenWidth, setScreenWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
 
   const toggleDropdown = (id: string) => {
     setDropdownVisible((prev) => ({ ...prev, [id]: !prev[id] }));
   };
   
   useEffect(() => {
-    const handleResize = () => {
-      setScreenWidth(window.innerWidth);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
+    if (typeof window !== "undefined") {
+      const handleResize = () => {
+        setScreenWidth(window.innerWidth);
+      };
+  
+      window.addEventListener("resize", handleResize);
+  
+      return () => window.removeEventListener("resize", handleResize);
+    }
   }, []);
 
   const handleRemoveDocument = async (doc: DocumentDTO) => {

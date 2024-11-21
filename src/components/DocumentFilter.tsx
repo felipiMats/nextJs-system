@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DocumentDTO } from "@/dtos/DocumentDTO";
 
 export default function FilterModal({
   filters,
@@ -17,7 +18,7 @@ export default function FilterModal({
   const [localFilters, setLocalFilters] = useState(filters);
 
   const handleApplyFilters = () => {
-    setFilters((prevFilters) => ({
+    setFilters((prevFilters: any) => ({
       ...prevFilters,
       ...localFilters,
     }));
@@ -41,7 +42,7 @@ export default function FilterModal({
       <div
         className="bg-white w-full sm:w-[400px] md:w-[500px] lg:w-[400px] h-screen sm:h-auto overflow-y-auto p-6"
         style={{
-          ...(window.innerWidth > 768 && { position: "absolute", right: 0, height: "100vh" }),
+          ...(window ? window.innerWidth > 768 && { position: "absolute", right: 0, height: "100vh" } : { position: "absolute", right: 0, height: "100vh" }),
         }}
       >
         <div className="flex-col mb-4">
@@ -72,7 +73,7 @@ export default function FilterModal({
                   type="date"
                   value={localFilters.creationStartDate}
                   onChange={(e) =>
-                    setLocalFilters((prev) => ({ ...prev, creationStartDate: e.target.value }))
+                    setLocalFilters((prev: any) => ({ ...prev, creationStartDate: e.target.value }))
                   }
                   className="border border-[#E5E7EB] w-full rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#CAFFD6]"
                 />
@@ -80,7 +81,7 @@ export default function FilterModal({
                   type="date"
                   value={localFilters.creationEndDate}
                   onChange={(e) =>
-                    setLocalFilters((prev) => ({ ...prev, creationEndDate: e.target.value }))
+                    setLocalFilters((prev: any) => ({ ...prev, creationEndDate: e.target.value }))
                   }
                   className="border border-[#E5E7EB] w-full rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#CAFFD6]"
                 />
@@ -89,7 +90,7 @@ export default function FilterModal({
             <label className="text-sm font-bold">Tipo de Documento</label>
             <Select
               onValueChange={(value) =>
-                setLocalFilters((prev) => ({ ...prev, documentType: value }))
+                setLocalFilters((prev: any) => ({ ...prev, documentType: value }))
               }
               value={localFilters.documentType}
             >
@@ -113,7 +114,7 @@ export default function FilterModal({
               type="text"
               value={localFilters.uploadedBy}
               onChange={(e) =>
-                setLocalFilters((prev) => ({ ...prev, uploadedBy: e.target.value }))
+                setLocalFilters((prev: any) => ({ ...prev, uploadedBy: e.target.value }))
               }
               className="border border-[#E5E7EB] w-full rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#CAFFD6]"
             />
@@ -126,7 +127,7 @@ export default function FilterModal({
               type="number"
               value={localFilters.minTax}
               onChange={(e) =>
-                setLocalFilters((prev) => ({ ...prev, minTax: e.target.value }))
+                setLocalFilters((prev: any) => ({ ...prev, minTax: e.target.value }))
               }
               className="border border-[#E5E7EB] w-full rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#CAFFD6]"
             />
@@ -139,7 +140,7 @@ export default function FilterModal({
               type="number"
               value={localFilters.maxNetValue}
               onChange={(e) =>
-                setLocalFilters((prev) => ({ ...prev, maxNetValue: e.target.value }))
+                setLocalFilters((prev: any) => ({ ...prev, maxNetValue: e.target.value }))
               }
               className="border border-[#E5E7EB] w-full rounded mb-6 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#CAFFD6]"
             />
