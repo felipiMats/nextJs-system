@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { DocumentDTO } from "@/dtos/DocumentDTO";
 import { api } from "@/lib/apiClient";
+import PreviewDocument from "./DocumentPreview";
 
 export default function DocumentModal({
   refreshDocuments,
@@ -24,6 +25,7 @@ export default function DocumentModal({
 }) {
   const [open, setOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedDocument, setSelectedDocument] = useState<{ fileName: string; file: string | File } | null>(null);
   const {
     register,
     handleSubmit,
@@ -45,10 +47,21 @@ export default function DocumentModal({
         attachment: data.attachment,
         creationDate: new Date().toISOString(),
       };
-      await api.createDocument(payload)
-      refreshDocuments();
-      reset();
-      setOpen(false);
+
+      let progress = 0;
+      const interval = setInterval( async () => {
+        if (progress >= 100) {
+          clearInterval(interval);
+          await api.createDocument(payload)
+          refreshDocuments();
+          reset();
+          setOpen(false);
+          setUploadProgress(0);
+        } else {
+          setUploadProgress(progress += 20);
+        }
+      }, 100);
+
     } catch (error) {
       console.error('Error create document:', error);
     }
@@ -193,7 +206,11 @@ export default function DocumentModal({
                       e.preventDefault();
                       const file = e.dataTransfer.files?.[0];
                       if (file) {
-                        setValue('attachment', file);
+                        if (file.type === 'application/pdf') {
+                          setValue('attachment', file);
+                        } else {
+                          alert('Apenas arquivos PDF são permitidos!');
+                        }
                       }
                     }}
                   >
@@ -215,8 +232,19 @@ export default function DocumentModal({
                   <input
                     id="fileInput"
                     type="file"
+                    accept="application/pdf"
                     {...register('attachment')}
-                    onChange={(e) => setValue('attachment', e.target.files?.[0] || null)}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.type === 'application/pdf') {
+                          setValue('attachment', file);
+                        } else {
+                          alert('Apenas arquivos PDF são permitidos!');
+                          e.target.value = '';
+                        }
+                      }
+                    }}
                     className="hidden"
                   />
                   {errors.attachment && (
@@ -227,31 +255,54 @@ export default function DocumentModal({
 
 
               {file && (
-                <div className="flex items-center border border-[#E5E7EB] rounded-md mt-4 p-4">
-                  <div className="flex items-center justify-center w-14 h-14 bg-[#F9FAFB] rounded-full">
-                    <TbFileUpload size={24} color="#9CA3AF" />
-                  </div>
-                  <div className="flex flex-col ml-4 flex-1">
-                    <span className="text-sm text-[#3A424E]">{file.name}</span>
-                    <span className="text-xs text-[#9CA3AF]">
-                      {((file.size / 1024 / 1024).toFixed(2))}MB de 10MB
-                    </span>
-                    <div className="relative w-full h-2 bg-[#E5E7EB] rounded-full mt-2">
-                      <div
-                        style={{ width: `${uploadProgress}%` }}
-                        className="absolute top-0 left-0 h-2 bg-[#05C151] rounded-full"
-                      ></div>
+                <div>
+                  <div className="flex mb-2 items-center border border-[#E5E7EB] rounded-md mt-4 p-4">
+                    <div className="flex items-center justify-center w-14 h-14 bg-[#F9FAFB] rounded-full">
+                      <TbFileUpload size={24} color="#9CA3AF" />
                     </div>
+                    <div className="flex flex-col ml-4 flex-1">
+                      <span className="text-sm text-[#3A424E]">{file.name}</span>
+                      <span className="text-xs text-[#9CA3AF]">
+                        {((file.size / 1024 / 1024).toFixed(2))}MB de 10MB
+                      </span>
+                      <div className="relative w-full h-2 bg-[#E5E7EB] rounded-full mt-2">
+                        <div
+                          style={{ width: `${uploadProgress}%` }}
+                          className="absolute top-0 left-0 h-2 bg-[#05C151] rounded-full"
+                          ></div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="ml-4 text-[#9CA3AF] hover:text-[#3A424E]"
+                      onClick={() => setValue('attachment', null)}
+                      >
+                      <IoCloseOutline size={18} />
+                    </button>
                   </div>
                   <button
                     type="button"
-                    className="ml-4 text-[#9CA3AF] hover:text-[#3A424E]"
-                    onClick={() => setValue("attachment", null)}
+                    className="flex md:w-auto items-center text-sm justify-center"
+                    onClick={() => 
+                      setSelectedDocument({
+                        fileName: watch("name"),
+                        file:  watch("attachment")!,
+                      })
+                    }
                   >
-                    <IoCloseOutline size={18} />
+                    <span className="text-sm font-normal text-[#05c151]">Pré-visualizar</span>
                   </button>
                 </div>
               )}
+
+              {selectedDocument && (
+                <PreviewDocument
+                  fileName={selectedDocument.fileName}
+                  file={selectedDocument.file}
+                  onClose={() => setSelectedDocument(null)}
+                />
+              )}
+
 
               <div className="flex justify-end mt-2 border-t border-[#E5E7EB]">
                 <button

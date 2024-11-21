@@ -14,8 +14,9 @@ import { formatDate } from "@/lib/formatDate";
 import { useEffect, useState } from "react";
 import { FiFileText, FiTrash } from "react-icons/fi";
 import { TbScanEye } from "react-icons/tb";
+import PreviewDocument from "./DocumentPreview";
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 9;
 
 export default function DocumentTable({
   refreshDocuments,
@@ -25,6 +26,7 @@ export default function DocumentTable({
   documents: DocumentDTO[];
 }) {
   const [dropdownVisible, setDropdownVisible] = useState<Record<string, boolean>>({});
+  const [selectedDocument, setSelectedDocument] = useState<{ fileName: string; file: string | File } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -100,10 +102,10 @@ export default function DocumentTable({
                      ...
                     </button>
                     {dropdownVisible[doc.id!] && (
-                      <div className="z-10 absolute right-0 mt-2 bg-white shadow-md rounded border w-44 p-2 flex flex-col">
+                      <div className="z-10 absolute top-4 right-4 mt-2 bg-white shadow-md rounded border w-44 p-1 flex flex-col">
                         <button
                           className="flex items-center space-x-2 px-2 py-1 hover:bg-gray-100 rounded"
-                          onClick={() => console.log(`Visualizar documento ${doc.id}`)}
+                          onClick={() => setSelectedDocument({ fileName: doc.name, file: doc.attachment! })}
                         >
                           <TbScanEye size={18} />
                           <span className="text-sm text-[#191E29]">Visualizar</span>
@@ -180,8 +182,15 @@ export default function DocumentTable({
           Próxima
         </button>
       </div>
-    </div>
 
+      {selectedDocument && (
+        <PreviewDocument
+          fileName={selectedDocument.fileName}
+          file={selectedDocument.file}
+          onClose={() => setSelectedDocument(null)}
+        />
+      )}
+    </div>
   );
 }
 

@@ -1,5 +1,6 @@
 import { DocumentDTO } from '@/dtos/DocumentDTO';
 import axios from 'axios';
+import { toBase64 } from './convertToBase64';
 
 const apiClient = axios.create({
   baseURL: '/api/documents',
@@ -7,15 +8,6 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
-const toBase64 = (file: File): Promise<string | null> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string | null);
-    reader.onerror = () => reject(null);
-    reader.readAsDataURL(file);
-  });
-};
 
 export const api = {
   getDocuments: async () => {
